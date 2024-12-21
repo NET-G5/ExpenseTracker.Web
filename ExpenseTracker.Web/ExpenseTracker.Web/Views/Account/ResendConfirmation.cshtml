@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["Title"] = "Confirmation Email Sent";
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+}
+
+<div class="confirmation-pending-container">
+    <h2>New Confirmation Email Sent</h2>
+    <p>Please check your email inbox and confirm your email address to complete the registration process.</p>
+    <p>If you do not receive the email within a few minutes, please check your spam folder or try again.</p>
+    <p>
+        Resend email in <strong>00:<span id="resend-verification-code-timer">59</span></strong>
+    </p>
+    <button class="btn btn-confirm" id="resend-verification-code" href="/email-confirmation" disabled>
+        Resend Confirmation Email
+    </button>
+</div>
+
+<script>
+    let timerDuration = 60000 // milliseconds
+    let endTime = Date.now() + timerDuration // keep track of the time difference explicitly
+    const resendCodeTrigger = document.querySelector('#resend-verification-code')
+    const resendCodeTimerElement = document.querySelector('#resend-verification-code-timer')
+
+    // Start countdown timer and show the time passing
+    const setResendCodeTimer = setInterval(() => {
+        let delta = endTime - Date.now() // milliseconds remaining till endTime
+        let remainingSeconds = Math.floor(delta / 1000) // convert milliseconds to seconds
+        resendCodeTimerElement.innerHTML = remainingSeconds < 10 ? `0${remainingSeconds}` : remainingSeconds // show 00:07 instead of 00:7
+    }, 1000) // update remaining time display every second
+
+    function stopResetCodeTimer() {
+        clearInterval(setResendCodeTimer)
+    }
+
+    // Enable the resend code button after timer duration (60 seconds) is up
+    function enableResendCodeButton() {
+        setTimeout(() => {
+            resendCodeTrigger.removeAttribute('disabled')
+            stopResetCodeTimer()
+        }, timerDuration - 1000)
+    }
+
+    enableResendCodeButton()
+</script>

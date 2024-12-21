@@ -1,0 +1,235 @@
+﻿@using ExpenseTracker.Web.ViewModels.Notification
+@model IEnumerable<NotificationViewModel>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Notifications</h3>
+        <div>
+            <button class="btn btn-success me-2 d-none" id="doneButton"><i class="fa-solid fa-check"></i></button>
+            <button class="btn btn-danger me-2 d-none" id="deleteButton"><i class="fa-solid fa-trash"></i></button>
+            <button class="btn btn-primary" id="selectAll">Select all</button>
+        </div>
+    </div>
+
+    <div class="notifications-list">
+        @foreach (var notification in Model)
+        {
+            <div class="notification-item d-flex align-items-center p-3 border-bottom" onclick="openPopup('@notification.Title', '@notification.Body', event)">
+                <input type="checkbox" class="form-check-input me-3 notification-checkbox">
+                <div class="details flex-grow-1">
+                    <a href="@notification.RedirectUrl" class="text-decoration-none text-white">
+                        <strong>@notification.Title</strong> <br />- @notification.Body
+                    </a>
+                </div>
+                <div class="notification-right ms-auto d-flex flex-column align-items-end">
+                    <span class="badge bg-warning mb-1">
+                        Pending
+                    </span>
+                    <div class="text-muted small">
+                        @notification.Date.ToString("MMM dd, yyyy h:mm tt")
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div id="popupModal" class="popup-modal">
+    <div class="popup-content">
+        <h2 id="popupTitle">Title</h2>
+        <p id="popupBody" class="popup-body">Body content</p>
+        <div class="popup-actions">
+            <button class="btn btn-danger" onclick="closePopup()">Reject</button>
+            <button class="btn btn-success" onclick="closePopup()">Accept</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const checkboxes = document.querySelectorAll('.notification-checkbox');
+    const doneButton = document.getElementById('doneButton');
+    const deleteButton = document.getElementById('deleteButton');
+    const selectAllButton = document.getElementById('selectAll');
+
+    function updateButtonsVisibility() {
+        const anyChecked = [...checkboxes].some(cb => cb.checked);
+        doneButton.classList.toggle('d-none', !anyChecked);
+        deleteButton.classList.toggle('d-none', !anyChecked);
+    }
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateButtonsVisibility);
+    });
+
+    doneButton.addEventListener('click', function () {
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                const notificationItem = checkbox.closest('.notification-item');
+                const badge = notificationItem.querySelector('.badge');
+                badge.textContent = 'Read';
+                badge.classList.remove('bg-primary');
+                badge.classList.add('bg-success');
+                checkbox.checked = false;
+            }
+        });
+        updateButtonsVisibility();
+    });
+
+    deleteButton.addEventListener('click', function () {
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                const notificationItem = checkbox.closest('.notification-item');
+                notificationItem.remove();
+            }
+        });
+        updateButtonsVisibility();
+    });
+
+    selectAllButton.addEventListener('click', function () {
+        const allChecked = [...checkboxes].every(cb => cb.checked);
+
+        if (allChecked) {
+            checkboxes.forEach(checkbox => checkbox.checked = false);
+            selectAllButton.textContent = 'Select all';
+        } else {
+            checkboxes.forEach(checkbox => checkbox.checked = true);
+            selectAllButton.textContent = `${checkboxes.length} selected`;
+        }
+
+        updateButtonsVisibility();
+    });
+
+    function openPopup(title, body, event) {
+        if (event.target.classList.contains('notification-checkbox')) return;
+
+        document.getElementById('popupTitle').innerText = title;
+        document.getElementById('popupBody').innerText = body;
+        document.getElementById('popupModal').style.display = 'flex';
+    }
+
+    function closePopup() {
+        document.getElementById('popupModal').style.display = 'none';
+    }
+</script>
+
+<style>
+    .d-none {
+        display: none;
+    }
+
+    h3 {
+        font-size: 24px;
+        font-weight: 600;
+        color: white;
+    }
+
+    .notifications-list {
+        border: 2px solid #3D444D;
+        border-radius: 10px;
+    }
+
+    .notification-item {
+        background-color: #0D1117;
+        transition: background-color 0.3s ease;
+        border-radius: 10px;
+        height: 100px;
+        font-size: 20px;
+        border-bottom: 2px solid #3D444D !important;
+        cursor: pointer;
+    }
+
+        .notification-item:hover {
+            background-color: #192639;
+        }
+
+    .details {
+        flex-grow: 1;
+    }
+
+    .notification-right {
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    .text-muted {
+        color: #6a737d;
+    }
+
+    .badge {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+
+    .border-bottom {
+        border-bottom: 2px solid #3D444D;
+    }
+
+    .form-check-input {
+        background-color: #ffffff;
+        border-color: #d1d5da;
+    }
+
+    .popup-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        background: rgba(0, 0, 1, 0.7);
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .popup-content {
+        background-color: #0D1117;
+        color: white;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        max-width: 90%;
+        width: 500px;
+        max-height: 90%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .popup-body {
+        font-size: 20px;
+    }
+
+    .popup-actions {
+        margin-top: 20px;
+    }
+
+        .popup-actions button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .popup-actions .btn-danger {
+            background-color: #FF2525;
+            color: white;
+            border-color: #FF2525;
+            font-weight: 500;
+            border-radius: 10px;
+        }
+
+        .popup-actions .btn-success {
+            background-color: #28a745;
+            color: white;
+            border-color: #28a745;
+            font-weight: 500;
+            border-radius: 10px;
+        }
+</style>

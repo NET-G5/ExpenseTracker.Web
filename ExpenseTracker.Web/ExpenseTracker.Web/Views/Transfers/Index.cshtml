@@ -1,0 +1,320 @@
+﻿@using ExpenseTracker.Web.ViewModels.Transfer
+@model IEnumerable<TransferViewModel>
+
+@{
+    ViewData["PageTitle"] = "Transactions";
+}
+
+<div class="form-container d-flex justify-content-between gap-3">
+    <div class="w-50">
+        <ejs-textbox id="search-box"
+                     name="search"
+                     placeholder="Search transfers"
+                     floatLabelType="Auto"
+                     value="@ViewBag.Search"
+                     input="onSearchChange">
+        </ejs-textbox>
+    </div>
+    <div class="w-50">
+        <ejs-combobox id="categories"
+                      name="categoryId"
+                      class="w-100"
+                      placeholder="Select category"
+                      floatLabelType="Auto"
+                      dataSource="@ViewBag.Categories"
+                      value="@ViewBag.SelectedCategory"
+                      allowObjectBinding="true"
+                      change="onCategoryChange">
+            <e-combobox-fields value="Id" text="Name"></e-combobox-fields>
+        </ejs-combobox>
+    </div>
+    <div class="w-50">
+        <ejs-combobox id="wallets"
+                      name="walletId"
+                      class="w-100"
+                      placeholder="Select wallet"
+                      floatLabelType="Auto"
+                      dataSource="@ViewBag.Wallets"
+                      value="@ViewBag.SelectedWallet"
+                      allowObjectBinding="true"
+                      change="onWalletChange">
+            <e-combobox-fields value="Id" text="Name"></e-combobox-fields>
+        </ejs-combobox>
+    </div>
+    <button type="button" id="openTransferModalButton" class="btn btn-success mt-4">+Transfer</button>
+</div>
+
+<div class="mt-4">
+    <ejs-grid id="transactions" 
+              dataSource="@Model" 
+              allowSorting="true" 
+              allowPaging="true">
+        <e-grid-pagesettings pageSize="10"></e-grid-pagesettings>
+        <e-grid-columns>
+            <e-grid-column headerText="Walletname" field="Wallet.Name"></e-grid-column>
+            <e-grid-column headerText="Categoryname" field="Category.Name"></e-grid-column>
+            <e-grid-column headerText="Date" field="Date" type="Date" format="dd-MMM-yyyy"></e-grid-column>
+            <e-grid-column headerText="Amount" field="Amount" textAlign="Left"></e-grid-column>
+            <e-grid-column template="#actionColumnTemplate"></e-grid-column>
+        </e-grid-columns>
+    </ejs-grid>
+</div>
+
+<div class="modal fade" id="transferDeleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog  modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body" id="deleteContent">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="transferCreatemodal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:650px;">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-center">
+                <h4 class="modal-title">Create transfer</h4>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="modal-body" id="transferCreateContent">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="transferEditModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:650px;">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-center">
+                <h4 class="modal-title">Edit transfer</h4>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="modal-body" id="transferEditContent">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="detailsTransferModal" tabindex="-1" aria-labelledby="detailsCategoryModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content w-100">
+            <div class="modal-header d-flex justify-content-center">
+                <div><h5 class="modal-title">Details</h5></div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <div id="transferDetailsContent" class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="actionColumnTemplate" type="text/x-template">
+    <div class="d-flex flex-row justify-content-start">
+        <button type="button" class="btn btn-sm no-a-decoration" title="Details" onclick="openDetailsModal(${Id})">
+            <i class="bi bi-card-list text-info" style="font-size: 21px;"></i>
+        </button>
+        <button type="button" class="btn btn-sm no-a-decoration" title="edit" onclick="openUpdateModal(${Id})">
+            <i class="fa-solid fa-pen fa-lg"></i>
+        </button>
+        <button class="btn btn-sm no-a-decoration" title="delete" onclick="openDeleteModal(${Id})">
+            <i class="fa-solid fa-trash-can fa-lg text-danger"></i>
+        </button>
+    </div>
+</script>
+
+<script type="text/javascript">
+    function openDeleteModal(id) {
+        $('#deleteContent').empty();
+        $.ajax({
+            url: "/transfers/delete/" + id,
+            type: 'GET',
+            success: function (data) {
+                $('#deleteContent').html(data);
+                $('#transferDeleteModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                }).modal('show');
+            },
+            error: function (error) {
+                alert("Error \n" + error);
+            }
+        });
+        $(this).find('#deleteContent').empty();
+        $(this).off('hidden.bs.modal');
+        $('#transferDeleteModal').on('click', function (e) {
+            if ($(e.target).is('#transferDeleteModal')) {
+                const modalContent = $(this).find('.modal-content');
+                modalContent.addClass('shake');
+                setTimeout(() => {
+                    modalContent.removeClass('shake');
+                }, 500);
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    function openDetailsModal(id) {
+        $('#transferDetailsContent').empty();
+        $.ajax({
+            url: "/transfers/details/" + id,
+            type: 'GET',
+            success: function (data) {
+                $('#transferDetailsContent').html(data);
+                $('#detailsTransferModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                }).modal('show');
+            },
+            error: function (error) {
+                alert("Error \n" + error);
+            }
+        });
+        $(this).find('#transferDetailsContent').empty();
+        $(this).off('hidden.bs.modal');
+        $('#detailsTransferModal').on('click', function (e) {
+            if ($(e.target).is('#detailsTransferModal')) {
+                const modalContent = $(this).find('.modal-content');
+                modalContent.addClass('shake');
+                setTimeout(() => {
+                    modalContent.removeClass('shake');
+                }, 500);
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    function openUpdateModal(id) {
+        $('#transferEditContent').empty();
+        $.ajax({
+            url: "/transfers/edit/" + id,
+            type: 'GET',
+            success: function (data) {
+                console.log(data);
+                $('#transferEditContent').html(data);
+                $('#transferEditModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                }).modal('show');
+            },
+            error: function (error) {
+                alert("Error \n" + error);
+            }
+        });
+        $(this).find('#transferEditContent').empty();
+        $(this).off('hidden.bs.modal');
+        $('#transferEditModal').on('click', function (e) {
+            if ($(e.target).is('#transferEditModal')) {
+                const modalContent = $(this).find('.modal-content');
+                modalContent.addClass('shake');
+                setTimeout(() => {
+                    modalContent.removeClass('shake');
+                }, 500);
+            }
+        });
+    }
+</script>
+
+<script>
+    function onCategoryChange(args) {
+        if (!args) { 
+            return; 
+        }
+
+        const searchBox = document.getElementById("search-box")?.ej2_instances[0];
+        const search = searchBox?.previousValue;
+        const selectedCategoryId = args.itemData.Id;
+        
+        $.ajax({
+            type: 'GET',
+            url: `/getTransfers?search=${search}&categoryId=${selectedCategoryId}`,
+            contentType: 'json',
+            success: function (data) {
+                const grid = document.getElementById("transactions").ej2_instances[0];
+                grid.dataSource = data;
+                grid.refresh();
+            }
+        });
+    }
+
+    function onSearchChange(args) {
+        if (!args) {
+            return;
+        }
+
+        const search = args.value;
+        const categoryCombobox = document.getElementById("categories")?.ej2_instances[0];
+        const selectedCategoryId = categoryCombobox?.itemData?.Id;
+
+        $.ajax({
+            type: 'GET',
+            url: `/getTransfers?search=${search}&categoryId=${selectedCategoryId}`,
+            contentType: 'json',
+            success: function (data) {
+                const grid = document.getElementById("transactions").ej2_instances[0];
+                grid.dataSource = data;
+                grid.refresh();
+            }
+        });
+    }
+    function onWalletChange(args) {
+        if (!args) {
+            return;
+        }
+
+        const search = args.value;
+        const walletCombobox = document.getElementById("wallets")?.ej2_instances[0];
+        const selectedWalletId = walletCombobox?.itemData?.Id;
+
+        $.ajax({
+            type: 'GET',
+            url: `/getWallets?search=${search}&walletId=${selectedWalletId}`,
+            contentType: 'json',
+            success: function (data) {
+                const grid = document.getElementById("wallets").ej2_instances[0];
+                grid.dataSource = data;
+                grid.refresh();
+            }
+        });
+    }
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('#openTransferModalButton').on('click', function () {
+            $('#transferCreateContent').empty();
+            $.ajax({
+                url: "/transfers/create",
+                type: 'GET',
+                success: function (data) {
+                    $('#transferCreateContent').html(data);
+                    $('#transferCreatemodal').modal({
+                        backdrop: 'static',
+                        keyboard: false
+                    }).modal('show');
+                },
+                error: function (error) {
+                    alert("Yaratish oynasini ochishda muommo bo'ldi \n" + error);
+                }
+            });
+            $(this).find('#transferCreateContent').empty();
+            $(this).off('hidden.bs.modal');
+            $('#transferCreatemodal').on('click', function (e) {
+                if ($(e.target).is('#transferCreatemodal')) {
+                    const modalContent = $(this).find('.modal-content');
+                    modalContent.addClass('shake');
+                    setTimeout(() => {
+                        modalContent.removeClass('shake');
+                    }, 500);
+                }
+            });
+        });
+    });
+</script>

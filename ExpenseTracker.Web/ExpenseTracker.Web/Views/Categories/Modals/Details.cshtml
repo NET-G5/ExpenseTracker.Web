@@ -1,0 +1,87 @@
+﻿<div class="modal fade" id="detailsCategoryModal" tabindex="-1" aria-labelledby="detailsCategoryModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content w-100">
+            <div class="modal-header d-flex justify-content-center">
+                <div><h5 class="modal-title">Details</h5></div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="grid-container">
+                    <div class="row content">
+                        <div class="col text-center">
+                            Name
+                        </div>
+                        <div class="col text-center">
+                            Type
+                        </div>
+                    </div>
+                    <div class="row value">
+                        <div class="col text-center">
+                            <span id="detailsCategoryName"></span>
+                        </div>
+                        <div class="col text-center">
+                            <span id="detailsCategoryType" template="#typeColumnTemplate"></span>
+                        </div>
+                    </div>
+                    <div class="row content">
+                        <div class="col text-center">
+                            Description
+                        </div>
+                    </div>
+                    <div class="row comments">
+                        <div class="col text-center">
+                            <span id="detailsCategoryDescription"></span>
+                            <div id="commentsDisplay"></div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="detailsCategoryId">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openDetailsModal(id) {
+        $.ajax({
+            type: 'GET',
+            url: `/categories/details/${id}`,
+            success: function (data) {
+                console.log(data);
+
+                // Set the category name and ID
+                $('#detailsCategoryName').text(data.Name);
+                $('#detailsCategoryId').val(data.Id);
+
+                // Set the description with a default text if empty
+                var comment = data.Description ? data.Description.trim() : "No comment";
+                $("#detailsCategoryDescription").text(comment);
+
+                // Display Type as "Income" or "Expense"
+                const typeColumnContent = data.Type === 0
+                    ? '<span class="badge bg-success">Income</span>'
+                    : '<span class="badge bg-danger">Expense</span>';
+                document.getElementById("detailsCategoryType").innerHTML = typeColumnContent;
+
+                // Show the modal
+                $('#detailsCategoryModal').modal('show');
+            },
+            error: function (error) {
+                console.log('Error fetching category details:', error);
+            }
+        });
+    }
+
+    // Add shake effect on modal background click
+    $('#detailsCategoryModal').on('click', function (e) {
+        if ($(e.target).is('#detailsCategoryModal')) {
+            const modalContent = $(this).find('.modal-content');
+            modalContent.addClass('shake');
+            setTimeout(() => {
+                modalContent.removeClass('shake');
+            }, 500);
+        }
+    });
+</script>

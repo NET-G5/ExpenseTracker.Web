@@ -1,0 +1,78 @@
+﻿<div class="modal fade" id="createWalletModal" tabindex="-1" aria-labelledby="createCategoryModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-center">
+                <h5 class="modal-title">New wallet</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createWalletForm" asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="mb-3">
+                        <ejs-textbox name="Name" id="title" placeholder="Title" class="form-control" floatLabelType="Always" required></ejs-textbox>
+                    </div>
+                    <div class="mb-3">
+                        <ejs-numerictextbox id="balance"
+                                            placeholder="Balance"
+                                            floatLabelType="Always"
+                                            min="1"
+                                            format="c0" required></ejs-numerictextbox>
+                    </div>
+                    <div class="mb-3">
+                        <ejs-textbox id="note"
+                                     name="Description"
+                                     placeholder="Description"
+                                     floatLabelType="Always" multiline="true">
+                        </ejs-textbox>
+                    </div>
+                    <div class="d-grid">
+                        <ejs-button id="submit" type="submit" content="Save" cssClass="e-success"></ejs-button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('#createWalletForm').submit(function (e) {
+        e.preventDefault();
+        var formData = $(this).serialize();
+        $.ajax({
+            type: 'POST',
+            url: '/wallets/create',
+            data: formData,
+            success: function (response) {
+                if (response.success) {
+                    $('#createWalletModal').modal('hide');
+                    $('#createWalletForm')[0].reset();
+                    onSave();
+                    loadCategories();
+                } else {
+                    $('#createWalletForm').prepend('<div class="alert alert-danger">' + response.errors.join('<br>') + '</div>');
+                }
+            },
+            error: function (xhr) {
+                console.log("Error loading form: " + xhr.responseText);
+            }
+        });
+    });
+    $('#createWalletModal').on('hidden.bs.modal', function () {
+        $('#createWalletForm')[0].reset();
+        $('#createWalletForm').find('.alert').remove();
+    });
+</script>
+
+<script>
+    $('#createWalletModal').on('click', function (e) {
+        if ($(e.target).is('#createWalletModal')) {
+            const modalContent = $(this).find('.modal-content');
+            modalContent.addClass('shake');
+            setTimeout(() => {
+                modalContent.removeClass('shake');
+            }, 500);
+        }
+    });
+</script> 

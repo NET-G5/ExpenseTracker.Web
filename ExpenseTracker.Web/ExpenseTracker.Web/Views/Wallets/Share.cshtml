@@ -1,0 +1,108 @@
+﻿@model ExpenseTracker.Web.Requests.WalletShare.CreateWalletShareRequest;
+
+@{
+    ViewData["PageTitle"] = "Share wallet";
+    Layout = "~/Views/Shared/_ModalForLayout.cshtml";
+}
+
+<form id="createShareForm" asp-action="Share" method="post">
+    <ejs-numerictextbox id="wallet-id" ejs-for="WalletId" allowObjectBinding="true" type="hidden"></ejs-numerictextbox>
+    <input type="hidden" id="users-list-input" asp-for="@Model.UsersToShareJson" />
+    <div class="d-flex justify-content-between">
+        <div class="mb-4" style="width:450px">
+            <ejs-textbox id="user-email"
+                         placeholder="Enter user email"
+                         floatLabelType="Never"
+                         showClearButton="true"
+                         multiline="false">
+            </ejs-textbox>
+        </div>
+        <div class="mb-3">
+            <ejs-button id="add-user-button"
+                        content="Add user"
+                        cssClass="e-success"
+                        type="button"
+                        onclick="onAddUser()"></ejs-button>
+        </div>
+    </div>
+    <div class="my-5" style="height: 100px; overflow-y: scroll;">
+        <h5 class="text-center">Selected users</h5>
+        <ejs-listview id="users-list" >
+            <e-listview-fieldsettings text="Text" id="Id">
+            </e-listview-fieldsettings>
+        </ejs-listview>
+    </div>
+    <div class="d-grid">
+        <ejs-button id="submit" type="submit" content="Submit" cssClass="e-success"></ejs-button>
+    </div>
+</form>
+  
+<script>
+    var usersList = [];
+
+    function onAddUser() {
+        var emailInput = document.getElementById('user-email').ej2_instances[0];
+        var usersListView = document.getElementById("users-list").ej2_instances[0];
+        var usersListInput = document.getElementById("users-list-input");
+        var user = emailInput.properties.value;
+
+        if (!user.trim()) {
+            alert('Iltimos, foydalanuvchi emailini kiriting.');
+            return;
+        }
+        if (usersList.some(el => user === el.Text)) {
+            return;
+        }
+
+        var newUser = {
+            Text: user,
+            Id: usersList.length + 1
+        };
+
+        usersList.push(newUser);
+        updateUserList();
+
+        var textOnlyList = usersList.map(el => el.Text);
+        usersListInput.value = JSON.stringify(textOnlyList);
+        
+        emailInput.value = '';
+        emailInput.dataBind();
+    }
+
+    function updateUserList() {
+        var listView = document.getElementById('users-list').ej2_instances[0];
+
+        var updatedUsers = usersList.map(function (user) {
+            return {
+                Text: `<span>${user.Text}</span><button onclick="removeUser(${user.Id})" class="btn-close btn-close-white" style="margin-top: -9px; margin-left:10px; line-height: 1; font-size:12px;"></button>`,
+                Id: user.Id
+            };
+        });
+
+        listView.dataSource = updatedUsers;
+        listView.template = '${Text}';
+        listView.dataBind();
+    }
+
+    function removeUser(id) {
+        usersList = usersList.filter(function (user) {
+            return user.Id !== id;
+        });
+
+        updateUserList();
+        document.getElementById("users-list-input").value = JSON.stringify(usersList.map(user => user.Text));
+    }
+    document.getElementById('createShareForm').addEventListener('submit', function (e) {
+        if (usersList.length === 0) {
+            e.preventDefault();
+            alert("Please select at least one user.");
+        } else {
+            errorMessage.style.display = "none";
+        }
+    });
+</script>
+
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/notification.js"></script>
+<ejs-scripts></ejs-scripts>

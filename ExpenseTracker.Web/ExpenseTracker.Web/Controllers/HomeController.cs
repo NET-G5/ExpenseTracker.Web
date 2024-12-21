@@ -1,32 +1,24 @@
-using System.Diagnostics;
-using ExpenseTracker.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ExpenseTracker.Web.Controllers
+namespace ExpenseTracker.Web.Controllers;
+
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    public HomeController()
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
-
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
     }
+
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    [Route("Home/Error")]
+    public IActionResult Error(int? statusCode = 500) =>
+        statusCode switch
+        {
+            401 => RedirectToAction("Login", "AccountController"),
+            404 => View("NotFound"),
+            _ => View("Error")
+        };
 }

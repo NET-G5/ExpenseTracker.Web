@@ -1,0 +1,46 @@
+﻿@using ExpenseTracker.Web.ViewModels.Wallet
+@model WalletViewModel
+
+@{
+    Layout = "~/Views/Shared/_ModalForLayout.cshtml";
+}
+<form asp-action="Edit" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <div class="mb-3">
+        <ejs-textbox id="title" placeholder="Title" ejs-for="Name" floatLabelType="Always" required></ejs-textbox>
+        <span asp-validation-for="Name" class="text-danger fs-6"></span>
+    </div>
+    <div class="mb-3">
+        <ejs-numerictextbox id="balance"
+                            ejs-for="Balance"
+                            placeholder="Balance"
+                            floatLabelType="Always"
+                            min="1"
+                            format="c0" required></ejs-numerictextbox>
+        <span asp-validation-for="Balance" class="text-danger fs-6"></span>
+    </div>
+    <div class="mb-3">
+        <ejs-textbox id="note"
+                     placeholder="Description"
+                     ejs-for="Description"
+                     floatLabelType="Always" multiline="true" required></ejs-textbox>
+    </div>
+    <div class="d-grid">
+        <ejs-button id="submit" type="submit" content="Submit" cssClass="e-success"></ejs-button>
+    </div>
+</form>
+
+<style>
+    .lSize {
+        font-family: "Roboto", "Segoe UI", "GeezaPro", "DejaVu Serif", "sans-serif";
+        font-size: 13px;
+        cursor: pointer;
+        user-select: none;
+    }
+</style>
+
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/notification.js"></script>
+<ejs-scripts></ejs-scripts>
