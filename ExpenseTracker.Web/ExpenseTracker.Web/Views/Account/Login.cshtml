@@ -1,29 +1,30 @@
-@model ExpenseTracker.Web.Requests.Auth.LoginUserRequest
+@model ExpenseTracker.Web.Requests.Auth.LoginUserRequest;
+
 
 @{
     ViewData["PageTitle"] = "Login";
+    var errorMessage = ViewData["ErrorMessage"];
     Layout = "~/Views/Shared/_LoginLayout.cshtml";
 }
 
 <div class="row">
     <div class="col-md-6 mx-auto">
         <div class="widget p-5" style="background-color:#212b36">
-            <h2 class="text-center mb-5">Login</h2>
+            <div class="mb-3 d-flex align-items-center flex-column">
+                <h2>Login</h2>
+                <span class="text-danger fs-6">@errorMessage</span>
+            </div>
             <form asp-action="Login" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <div class="mb-3">
-                    <ejs-textbox id="user-name" placeholder="UserName" ejs-for="UserName" floatLabelType="Always"></ejs-textbox>
+                <div class="mt-1">
+                    <ejs-textbox id="user-name" placeholder="Username" ejs-for="UserName" floatLabelType="Auto"></ejs-textbox>
                     <span asp-validation-for="UserName" class="text-danger fs-6"></span>
                 </div>
-                <div class="mb-3">
-                    <ejs-textbox id="password" placeholder="Password" ejs-for="Password" floatLabelType="Always" type="password"></ejs-textbox>
+                <div class="mt-1">
+                    <ejs-textbox id="password" placeholder="Password" ejs-for="Password" floatLabelType="Auto" type="password"></ejs-textbox>
                     <span asp-validation-for="Password" class="text-danger fs-6"></span>
                 </div>
-                <div class="mb-3 form-check">
-                    <input asp-for="RememberMe" type="checkbox" class="form-check-input" />
-                    <label asp-for="RememberMe" class="form-check-label">Remember me</label>
-                </div>
-                <div class="d-grid gap-2">
+                <div class="mt-5 d-grid gap-2">
                     <ejs-button id="submit" type="submit" content="Login" cssClass="e-success"></ejs-button>
                 </div>
             </form>

@@ -1,23 +1,29 @@
+using ExpenseTracker.Web.Stores.Dashboard;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.Web.Controllers;
 
 public class HomeController : Controller
 {
-    public HomeController()
+    private readonly IDashboardStore _store;
+
+    public HomeController(IDashboardStore store)
     {
+        _store = store ?? throw new ArgumentNullException(nameof(store));
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
+        var dashboard = await _store.GetDashboardAsync();
+
+        return View(dashboard);
     }
 
     [Route("Home/Error")]
     public IActionResult Error(int? statusCode = 500) =>
         statusCode switch
         {
-            401 => RedirectToAction("Login", "AccountController"),
+            401 => RedirectToAction("Login", "Account"),
             404 => View("NotFound"),
             _ => View("Error")
         };
