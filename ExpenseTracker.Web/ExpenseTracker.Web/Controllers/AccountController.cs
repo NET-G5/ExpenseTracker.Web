@@ -1,6 +1,7 @@
+using ExpenseTracker.Web.Requests.Auth;
 using ExpenseTracker.Web.Stores.Auth;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using UAParser;
 
 namespace ExpenseTracker.Web.Controllers;
 
@@ -8,9 +9,12 @@ public class AccountController : Controller
 {
     private readonly IAuthStore _store;
 
-    public AccountController(IAuthStore store)
+    IHttpContextAccessor _contextAccessor;
+
+    public AccountController(IAuthStore store, IHttpContextAccessor contextAccessor)
     {
         _store = store;
+        _contextAccessor = contextAccessor;
     }
 
     [HttpGet]
@@ -22,7 +26,7 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Login(LoginRequest request, string? returnUrl = null)
+    public async Task<IActionResult> Login(LoginUserRequest request, string? returnUrl = null)
     {
         ViewData["ReturnUrl"] = returnUrl;
 
@@ -31,8 +35,14 @@ public class AccountController : Controller
             return View(request);
         }
 
-        await _store.LoginAsync(request);
+        var isSuccess = await _store.LoginAsync(request);
 
+        if (isSuccess)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        ViewData["ErrorMessage"] = "Invalid username or password.";
         return View(request);
     }
 
@@ -45,7 +55,7 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Register(RegisterRequest request, string? returnUrl = null)
+    public async Task<IActionResult> Register(RegisterUserRequest request, string? returnUrl = null)
     {
         ViewData["ReturnUrl"] = returnUrl;
 
@@ -54,9 +64,24 @@ public class AccountController : Controller
             return View(request);
         }
 
+        var userAgent = _contextAccessor.HttpContext?.Request?.Headers.UserAgent;
+        var agent = Parser.GetDefault().Parse(userAgent);
+
+        request.Browser = agent.UA.ToString();
+        request.OS = agent.OS.ToString();
+        request.ConfirmUrl = Url.Action(nameof(EmailConfirmed), "Account", null, protocol: Request.Scheme);
+
+
         await _store.RegisterAsync(request);
 
         return View(request);
+    }
+
+    public async Task<IActionResult> EmailConfirmed(string token, string email)
+    {
+        await _store.EmailConfirmedAsync(new EmailConfirmedRequest(email, token));
+
+        return View();
     }
 
     //public IActionResult RegisterConfirmation()

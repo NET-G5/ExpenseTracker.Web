@@ -1,9 +1,7 @@
 ﻿using ExpenseTracker.Web.Configurations;
+using ExpenseTracker.Web.Requests.Auth;
 using ExpenseTracker.Web.Stores.Auth;
-using ExpenseTracker.Web.ViewModels.Auth;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 
 namespace ExpenseTracker.Web.Stores;
 
@@ -22,25 +20,39 @@ internal sealed class AuthStore : IAuthStore
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task LoginAsync(LoginRequest request)
+    public async Task<bool> LoginAsync(LoginUserRequest request)
     {
-        var response = await _client.PostAsJsonAsync("/auth/login", request);
+        var response = await _client.PostAsJsonAsync("auth/login", request);
 
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            return false;
+        }
 
-        var json = await response.Content.ReadAsStringAsync();
-        var result = JsonConvert.DeserializeObject<LoginViewModel>(json);
+        var token = await response.Content.ReadAsStringAsync();
 
-        if (result is null)
+        if (string.IsNullOrEmpty(token))
         {
             throw new InvalidOperationException("Could not deserialize Login response.");
         }
 
-        _httpContextAccessor.HttpContext?.Response?.Cookies?.Append("JWT", result.Token);
+        _httpContextAccessor.HttpContext?.Response?.Cookies?.Append("JWT", token);
+
+        return true;
     }
 
-    public Task RegisterAsync(RegisterRequest request)
+    public async Task RegisterAsync(RegisterUserRequest request)
     {
-        throw new NotImplementedException();
+        var response = await _client.PostAsJsonAsync("auth/register", request);
+        var json = await response.Content.ReadAsStringAsync();
+
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task EmailConfirmedAsync(EmailConfirmedRequest request)
+    {
+        var response = await _client.PostAsJsonAsync("auth/confirm-email", request);
+
+        response.EnsureSuccessStatusCode();
     }
 }

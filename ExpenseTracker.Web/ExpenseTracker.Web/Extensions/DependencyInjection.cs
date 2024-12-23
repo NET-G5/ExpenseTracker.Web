@@ -3,6 +3,7 @@ using ExpenseTracker.Web.Filters;
 using ExpenseTracker.Web.Services.Api;
 using ExpenseTracker.Web.Stores;
 using ExpenseTracker.Web.Stores.Auth;
+using ExpenseTracker.Web.Stores.Dashboard;
 using Syncfusion.Licensing;
 
 namespace ExpenseTracker.Web.Extensions;
@@ -40,6 +41,7 @@ public static class DependencyInjection
     private static void AddStores(IServiceCollection services)
     {
         services.AddScoped<IAuthStore, AuthStore>();
+        services.AddScoped<IDashboardStore, DashboardStore>();
     }
 
     private static void AddServices(IServiceCollection services)

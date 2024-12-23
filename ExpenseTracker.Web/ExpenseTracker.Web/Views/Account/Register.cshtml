@@ -8,26 +8,34 @@
 <div class="row">
     <div class="col-md-6 mx-auto">
         <div class="widget p-5" style="background-color: #212b36">
-            <h2 class="text-center mb-5">Register</h2>
+            <h2 class="text-center mb-3">Register</h2>
             <form asp-action="Register" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <div class="mb-3">
-                    <ejs-textbox id="username" placeholder="Username" ejs-for="UserName" floatLabelType="Always"></ejs-textbox>
+                <div class="mb-1">
+                    <ejs-textbox id="username" placeholder="Username" ejs-for="UserName" floatLabelType="Auto"></ejs-textbox>
                     <span asp-validation-for="UserName" class="text-danger fs-6"></span>
                 </div>
-                <div class="mb-3">
-                    <ejs-textbox id="email" placeholder="Email" ejs-for="Email" floatLabelType="Always"></ejs-textbox>
-                    <span asp-validation-for="Email" class="text-danger fs-6"></span>
+                <div class="d-flex gap-5">
+                    <div class="w-50 mb-1">
+                        <ejs-textbox id="email" placeholder="Email" ejs-for="Email" floatLabelType="Auto"></ejs-textbox>
+                        <span asp-validation-for="Email" class="text-danger fs-6"></span>
+                    </div>
+                    <div class="w-50 mb-1">
+                        <ejs-textbox id="phone-number" placeholder="Phone Number" ejs-for="PhoneNumber" floatLabelType="Auto" type="phoneNumber"></ejs-textbox>
+                        <span asp-validation-for="PhoneNumber" class="text-danger fs-6"></span>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <ejs-textbox id="password" placeholder="Password" ejs-for="Password" floatLabelType="Always" type="password"></ejs-textbox>
-                    <span asp-validation-for="Password" class="text-danger fs-6"></span>
+                <div class="d-flex gap-5 mb-1">
+                    <div class="w-50">
+                        <ejs-textbox id="password" placeholder="Password" ejs-for="Password" floatLabelType="Auto" type="password"></ejs-textbox>
+                        <span asp-validation-for="Password" class="text-danger fs-6"></span>
+                    </div>
+                    <div class="w-50">
+                        <ejs-textbox id="confirm-password" placeholder="Confirm password" ejs-for="ConfirmPassword" floatLabelType="Auto" type="password"></ejs-textbox>
+                        <span asp-validation-for="ConfirmPassword" class="text-danger fs-6"></span>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <ejs-textbox id="confirm-password" placeholder="Confirm password" ejs-for="ConfirmPassword" floatLabelType="Always" type="password"></ejs-textbox>
-                    <span asp-validation-for="ConfirmPassword" class="text-danger fs-6"></span>
-                </div>
-                <div class="d-grid gap-2">
+                <div class="d-grid mt-5">
                     <ejs-button id="submit" type="submit" content="Register" cssClass="e-success"></ejs-button>
                 </div>
             </form>

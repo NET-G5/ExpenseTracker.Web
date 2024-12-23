@@ -1,4 +1,7 @@
-﻿@{
+﻿@using ExpenseTracker.Web.ViewModels.Dashboard
+@model DashboardViewModel;
+
+@{
     ViewData["isDashboard"] = true;
 }
 
@@ -12,7 +15,7 @@
             </div>
             <div class="d-flex flex-column m-auto py-3">
                 <span class="lead">Balance</span>
-                <h1 class="display-6 fw-bold">@ViewBag.Balance</h1>
+                <h1 class="display-6 fw-bold">@Model.Balance</h1>
             </div>
         </div>
     </div>
@@ -24,7 +27,7 @@
             </div>
             <div class="d-flex flex-column m-auto py-3">
                 <span class="lead">Total Income</span>
-                <h1 class="display-6 fw-bold">@ViewBag.TotalIncome</h1>
+                <h1 class="display-6 fw-bold">@Model.TotalIncome</h1>
             </div>
         </div>
     </div>
@@ -36,7 +39,7 @@
             </div>
             <div class="d-flex flex-column m-auto py-3">
                 <span class="lead">Total Expense</span>
-                <h1 class="display-6 fw-bold">@ViewBag.TotalExpense</h1>
+                <h1 class="display-6 fw-bold">@Model.TotalExpense</h1>
             </div>
         </div>
     </div>
@@ -51,7 +54,7 @@
             </div>
             <ejs-accumulationchart id="doughnutchart" enableSmartLabels background="#1a222b">
                 <e-accumulation-series-collection>
-                    <e-accumulation-series dataSource="@ViewBag.DoughnutChartData"
+                    <e-accumulation-series dataSource="@Model.DoughnutChartData"
                                            xName="categoryTitleWithIcon" yName="amount"
                                            innerRadius="60%" legendShape="Circle"
                                            palettes=@(new string[]{"#0e8d76","#a4b219","#cb9b00","#8a442c","#0454b5","#7d0a0a","#822690","#4c2090","#313e93","#0096ac"})>
@@ -85,9 +88,9 @@
                     <e-chartarea-border width="0"></e-chartarea-border>
                 </e-chart-chartarea>
                 <e-series-collection>
-                    <e-series dataSource="@ViewBag.SplineChartData" xName="day" width="3"
+                    <e-series dataSource="@Model.SplineChartData" xName="day" width="3"
                               yName="income" name="Income" type="@Syncfusion.EJ2.Charts.ChartSeriesType.Spline"></e-series>
-                    <e-series dataSource="@ViewBag.SplineChartData" xName="day" width="3"
+                    <e-series dataSource="@Model.SplineChartData" xName="day" width="3"
                               yName="expense" name="Expense" type="@Syncfusion.EJ2.Charts.ChartSeriesType.Spline"></e-series>
                 </e-series-collection>
                 <e-chart-legendsettings position="Top" alignment="Far" toggleVisibility="false">
@@ -108,7 +111,7 @@
             </div>
             <div class="px-4 pb-4">
                 <ejs-grid id="recent-transfers"
-                          dataSource="@ViewBag.RecentTransfers" gridLines="None">
+                          dataSource="@Model.RecentTransfers" gridLines="None">
                     <e-grid-columns>
                         <e-grid-column headerText="Category" field="Category"></e-grid-column>
                         <e-grid-column headerText="Date" field="Date" type="date" format="MMM-dd-yy"></e-grid-column>
