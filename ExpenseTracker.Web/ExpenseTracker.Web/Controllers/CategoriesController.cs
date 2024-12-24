@@ -11,7 +11,7 @@ public class CategoriesController : Controller
 
     public CategoriesController(ICategoryStore store)
     {
-        _store = store ?? throw new ArgumentException(nameof(store));
+        _store = store ?? throw new ArgumentNullException(nameof(store));
     }
 
     public async Task<IActionResult> Index([FromQuery] GetCategoriesRequest request)
