@@ -51,21 +51,17 @@
             success: function (data) {
                 console.log(data);
 
-                // Set the category name and ID
-                $('#detailsCategoryName').text(data.Name);
+                $('#detailsCategoryName').text(data.name);
                 $('#detailsCategoryId').val(data.Id);
 
-                // Set the description with a default text if empty
-                var comment = data.Description ? data.Description.trim() : "No comment";
+                var comment = data.description ? data.description.trim() : "No comment";
                 $("#detailsCategoryDescription").text(comment);
 
-                // Display Type as "Income" or "Expense"
-                const typeColumnContent = data.Type === 0
+                const typeColumnContent = data.type === 0
                     ? '<span class="badge bg-success">Income</span>'
                     : '<span class="badge bg-danger">Expense</span>';
                 document.getElementById("detailsCategoryType").innerHTML = typeColumnContent;
 
-                // Show the modal
                 $('#detailsCategoryModal').modal('show');
             },
             error: function (error) {
@@ -74,7 +70,6 @@
         });
     }
 
-    // Add shake effect on modal background click
     $('#detailsCategoryModal').on('click', function (e) {
         if ($(e.target).is('#detailsCategoryModal')) {
             const modalContent = $(this).find('.modal-content');

@@ -19,8 +19,8 @@
             type: 'GET',
             url: `/categories/details/${id}`,
             success: function (data) {
-                $('#deleteCategoryId').val(data.Id);
-                $('#deleteCategoryName').text(data.Name);
+                $('#deleteCategoryId').val(data.id);
+                $('#deleteCategoryName').text(data.name);
 
                 $('#deleteCategoryModal').modal('show');
             },

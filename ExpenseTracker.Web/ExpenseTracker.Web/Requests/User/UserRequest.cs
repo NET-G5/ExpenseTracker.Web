@@ -7,4 +7,4 @@ public sealed record UserRequest(
     string UserName,
     string Email,
     string? PhoneNumber)
-    : UserRequestId(Id);
+    : Common.UserRequest(Id);

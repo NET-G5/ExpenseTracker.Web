@@ -10,4 +10,4 @@ public record CreateWalletRequest(
     string? Description,
     [Required(ErrorMessage = "Balance entry is mandatory")]
     decimal Balance)
-    : UserRequestId(UserId: UserId);
+    : UserRequest(UserId: UserId);
