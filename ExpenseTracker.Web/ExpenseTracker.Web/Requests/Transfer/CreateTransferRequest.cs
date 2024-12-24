@@ -9,4 +9,4 @@ public record CreateTransferRequest(
     string? Notes,
     decimal Amount,
     DateTime Date)
-    : UserRequestId(UserId: UserId);
+    : UserRequest(UserId: UserId);

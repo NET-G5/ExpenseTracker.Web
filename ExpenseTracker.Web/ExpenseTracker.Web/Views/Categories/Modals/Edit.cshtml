@@ -1,6 +1,4 @@
-﻿@using ExpenseTracker.Web.ViewModels.Category
-@model CategoryViewModel;
-
+﻿
 <div class="modal fade" id="updateCategoryModal" tabindex="-1" aria-labelledby="updateCategoryModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -12,13 +10,8 @@
             </div>
             <div class="modal-body">
                 <form id="updateCategoryForm" asp-action="Edit" method="post">
-                    <input type="hidden" id="categoryIdEdit" name="Id">
-                    <div class='e-btn-group custom-rbt-group mb-3'>
-                        <input type="radio" id="radioleft" name="Type" value="Expense" checked="@(Model == null || Model.Type == ExpenseTracker.Web.Enums.CategoryType.Expense)" />
-                        <label class="e-btn e-btn-danger" for="radioleft">Expense</label>
-                        <input type="radio" id="radiomiddle" name="Type" value="Income" checked="@(Model?.Type == ExpenseTracker.Web.Enums.CategoryType.Income)" />
-                        <label class="e-btn e-btn-success" for="radiomiddle">Income</label>
-                    </div>
+                    <input type="hidden" id="categoryIdEdit" name="Id">   
+                    <input type="hidden" id="categoryTypeEdit" name="type" />
                     <div class="mb-3">
                         <ejs-textbox type="text" placeholder="Name" floatLabelType="Always" class="form-control" id="categoryNameEdit" name="Name" required />
                     </div>
@@ -26,7 +19,7 @@
                         <ejs-textbox type="text" placeholder="Note" floatLabelType="Always" multiline=true class="form-control" id="categoryDescriptionEdit" name="Description" />
                     </div>
                     <div class="d-grid gap-3">
-                        <button type="submit" class="btn btn-success" id="submitBtn" onclick="confirmUpdateCategory()">Save</button>
+                        <button type="button" class="btn btn-success" id="submitBtn" onclick="confirmUpdateCategory()">Save</button>
                     </div>
                 </form>
             </div>
@@ -39,15 +32,16 @@
         $.ajax({
             type: 'GET',
             url: `/categories/details/${id}`,
-
             success: function (data) {
                 console.log(data);
-                $('#categoryIdEdit').val(data.Id);
-                $('#categoryNameEdit').val(data.Name);
-                $('#categoryTypeEdit').val(data.Type);
+                $('#categoryIdEdit').val(data.id);
+                $('#categoryNameEdit').val(data.name);
+                $('#categoryTypeEdit').val(data.type);
                 
-                $('#categoryDescriptionEdit').text(data.Description);
-
+                 var textbox = document.getElementById('categoryDescriptionEdit').ej2_instances[0];
+                        textbox.value = data.description;
+                        textbox.dataBind(); 
+                
                 $('#updateCategoryModal').modal('show');
             },
             error: function (error) {
@@ -59,24 +53,16 @@
     function confirmUpdateCategory() {
         var formData = $('#updateCategoryForm').serialize();
         var id = $('#categoryIdEdit').val();
-        var token = $('input[name="__RequestVerificationToken"]').val();
-
+        
         $.ajax({
             type: 'POST',
-            url: '/categories/edit/' + id,
-            headers: {
-                'RequestVerificationToken': token
-            },
+            url: '/categories/edit/' + id,            
             data: formData,
-            success: function (response) {
-                if (response.success) {
-                    $('#updateCategoryModal').modal('hide');
+            success: function () {
+                
+                $('#updateCategoryModal').modal('hide');
 
-                    loadCategories()
-                } else {
-                    console.log('Edit failed:', response.errors);
-                    alert('Update failed. Please try again.');
-                }
+                loadCategories()
             },
             error: function (error) {
                 console.log('Error updating category:', error);

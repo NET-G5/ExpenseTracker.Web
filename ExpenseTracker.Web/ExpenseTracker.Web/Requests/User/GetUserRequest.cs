@@ -8,4 +8,4 @@ public sealed record GetUserRequest(
     string Email,
     string? PhoneNumber,
     string? Search)
-    : UserRequestId(Id);
+    : Common.UserRequest(Id);

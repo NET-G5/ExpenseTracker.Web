@@ -111,10 +111,10 @@
 @await Html.PartialAsync("Details")
 
 <script>
-    function loadCategories() {
+    function loadWallets() {
         $.ajax({
             type: 'GET',
-            url: '/getWallets',
+            url: '/getwallets',
             contentType: 'json',
             success: function (data) {
                 onSave();

@@ -8,4 +8,4 @@ public record CreateUserRequest(
     string Email,
     string? PhoneNumber,
     string Password)
-    : UserRequestId(Id);
+    : Common.UserRequest(Id);

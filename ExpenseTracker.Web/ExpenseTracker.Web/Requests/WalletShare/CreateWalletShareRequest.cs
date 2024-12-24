@@ -21,4 +21,4 @@ public record CreateWalletShareRequest(
     int WalletId,
     string? UsersToShareJson,
     List<string> UsersToShare)
-    : UserRequestId(UserId: UserId);
+    : UserRequest(UserId: UserId);
