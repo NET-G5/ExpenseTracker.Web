@@ -8,18 +8,28 @@ namespace ExpenseTracker.Web.Controllers;
 public class AccountController : Controller
 {
     private readonly IAuthStore _store;
+    private readonly ILogger<AccountController> _logger;
+    private readonly IHttpContextAccessor _contextAccessor;
 
-    IHttpContextAccessor _contextAccessor;
-
-    public AccountController(IAuthStore store, IHttpContextAccessor contextAccessor)
+    public AccountController(
+        IAuthStore store,
+        IHttpContextAccessor contextAccessor,
+        ILogger<AccountController> logger)
     {
         _store = store;
         _contextAccessor = contextAccessor;
+        _logger = logger;
     }
 
     [HttpGet]
     public IActionResult Login(string? returnUrl = null)
     {
+        _logger.LogInformation("Entered Login page");
+        _logger.LogWarning("Warning from Login");
+        _logger.LogError("Error from Login");
+        _logger.LogTrace("Trace from Login");
+        _logger.LogCritical("Critical from Login");
+
         ViewData["ReturnUrl"] = returnUrl;
 
         return View();
@@ -39,9 +49,11 @@ public class AccountController : Controller
 
         if (isSuccess)
         {
+            _logger.LogInformation("Login successful");
             return RedirectToAction("Index", "Home");
         }
 
+        _logger.LogWarning("Login failed");
         ViewData["ErrorMessage"] = "Invalid username or password.";
         return View(request);
     }
@@ -57,24 +69,32 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<IActionResult> Register(RegisterUserRequest request, string? returnUrl = null)
     {
-        ViewData["ReturnUrl"] = returnUrl;
-
-        if (!ModelState.IsValid)
+        try
         {
+            ViewData["ReturnUrl"] = returnUrl;
+
+            if (!ModelState.IsValid)
+            {
+                return View(request);
+            }
+
+            var userAgent = _contextAccessor.HttpContext?.Request?.Headers.UserAgent;
+            var agent = Parser.GetDefault().Parse(userAgent);
+
+            request.Browser = agent.UA.ToString();
+            request.OS = agent.OS.ToString();
+            request.ConfirmUrl = Url.Action(nameof(EmailConfirmed), "Account", null, protocol: Request.Scheme);
+
+
+            await _store.RegisterAsync(request);
+
             return View(request);
         }
-
-        var userAgent = _contextAccessor.HttpContext?.Request?.Headers.UserAgent;
-        var agent = Parser.GetDefault().Parse(userAgent);
-
-        request.Browser = agent.UA.ToString();
-        request.OS = agent.OS.ToString();
-        request.ConfirmUrl = Url.Action(nameof(EmailConfirmed), "Account", null, protocol: Request.Scheme);
-
-
-        await _store.RegisterAsync(request);
-
-        return View(request);
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error registering: {ex.Message}");
+            throw;
+        }
     }
 
     public async Task<IActionResult> EmailConfirmed(string token, string email)
