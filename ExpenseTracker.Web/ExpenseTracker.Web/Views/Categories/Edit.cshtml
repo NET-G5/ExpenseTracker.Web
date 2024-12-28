@@ -3,7 +3,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header d-flex justify-content-center">
-                <h5 class="modal-title">Edit Category</h5>
+                <h5 class="modal-title">Edit category</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
                     <span aria-hidden="true"></span>
                 </button>
@@ -58,11 +58,8 @@
             type: 'POST',
             url: '/categories/edit/' + id,            
             data: formData,
-            success: function () {
-                
-                $('#updateCategoryModal').modal('hide');
-
-                loadCategories()
+            success: function () {               
+                $('#updateCategoryModal').modal('hide');                
             },
             error: function (error) {
                 console.log('Error updating category:', error);

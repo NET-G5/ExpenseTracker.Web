@@ -6,6 +6,7 @@ public sealed record GetTransfersRequest(
     Guid UserId,
     int? CategoryId,
     int? WalletId,
+    string Title,
     string? Search,
     decimal MaxAmount,
     decimal? MinAmount)

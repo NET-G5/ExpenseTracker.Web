@@ -41,6 +41,15 @@
             <e-combobox-fields value="Id" text="Name"></e-combobox-fields>
         </ejs-combobox>
     </div>
+    <div class="w-25 mt-4">
+        <button class="btn btn-outline-info dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa-solid fa-download"></i> Download
+        </button>
+        <div class="dropdown-menu p-3" id="dropdownMenu" aria-labelledby="dropdownMenuButton" data-bs-auto-close="outside">
+            <ejs-calendar id="calendar" change="valueChange" Start="Year" Depth="Year"></ejs-calendar>
+            <a class="dropdown-item mt-2 btn btn-info" href="#" id="downloadButton">Download</a>
+        </div>
+    </div>
     <button type="button" id="openTransferModalButton" class="btn btn-success mt-4">+Transfer</button>
 </div>
 
@@ -51,8 +60,9 @@
               allowPaging="true">
         <e-grid-pagesettings pageSize="10"></e-grid-pagesettings>
         <e-grid-columns>
-            <e-grid-column headerText="Walletname" field="Wallet.Name"></e-grid-column>
-            <e-grid-column headerText="Categoryname" field="Category.Name"></e-grid-column>
+            <e-grid-column headerText="Title" field="Title"></e-grid-column>
+            <e-grid-column headerText="Walletname" field="WalletName"></e-grid-column>
+            <e-grid-column headerText="Categoryname" field="CategoryName"></e-grid-column>
             <e-grid-column headerText="Date" field="Date" type="Date" format="dd-MMM-yyyy"></e-grid-column>
             <e-grid-column headerText="Amount" field="Amount" textAlign="Left"></e-grid-column>
             <e-grid-column template="#actionColumnTemplate"></e-grid-column>
@@ -73,7 +83,7 @@
     <div class="modal-dialog modal-dialog-centered" style="max-width:650px;">
         <div class="modal-content">
             <div class="modal-header d-flex justify-content-center">
-                <h4 class="modal-title">Create transfer</h4>
+                <h4 class="modal-title">New transfer</h4>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
                     <span aria-hidden="true"></span>
                 </button>
@@ -126,6 +136,47 @@
             <i class="fa-solid fa-trash-can fa-lg text-danger"></i>
         </button>
     </div>
+</script>
+
+<script>
+    let selectedYear = new Date().getFullYear();
+    let selectedMonth = new Date().getMonth() + 1;
+
+    function valueChange(args) {
+        var selectedDate = args.value;
+        selectedYear = selectedDate.getFullYear();
+        selectedMonth = selectedDate.getMonth() + 1;
+
+        document.getElementById('date_label').textContent = 'Выбранное значение: ' + selectedDate.toDateString();
+    }
+
+    document.getElementById('dropdownMenu').addEventListener('click', function (event) {
+        event.stopPropagation();
+    });
+
+    document.getElementById('downloadButton').addEventListener('click', function (e) {
+        e.preventDefault();
+
+        const url = `Transfers/DownloadPdf`;
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', '');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        const dropdown = bootstrap.Dropdown.getInstance(document.getElementById('dropdownMenuButton'));
+        dropdown.hide();
+    });
+
+    function onDataBound() {
+        const headers = document.querySelectorAll('#transactions .e-headercell');
+
+        headers.forEach(header => {
+            header.setAttribute('title', header.innerText.trim());
+        });
+    }
 </script>
 
 <script type="text/javascript">

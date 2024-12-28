@@ -83,7 +83,7 @@
             </div>
         </div>
     </div>
-    <div id="dropdownMenu" class="dropdown dropdown-menu-end" style="width:200px">
+    <div id="AccountDropdownMenu" class="dropdown dropdown-menu-end" style="width:200px">
         <span>
             <a asp-controller="Account" asp-action="Details" style="color:#1C375C" class=" fs-6 fw-bold"><i class="fa fa-user"></i> Personal cabinet</a>
         </span>
@@ -94,12 +94,12 @@
     
     <script>
         function toggleDropdown() {
-            const dropdown = document.getElementById('dropdownMenu');
+            const dropdown = document.getElementById('AccountDropdownMenu');
             dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
         }
         window.onclick = function (event) {
             if (!event.target.matches('.profile-pic img')) {
-                const dropdown = document.getElementById('dropdownMenu');
+                const dropdown = document.getElementById('AccountDropdownMenu');
                 if (dropdown.style.display === 'block') {
                     dropdown.style.display = 'none';
                 }
@@ -111,11 +111,11 @@
         .dropdown {
             display: none;
             position: absolute;
-            top: 107px;
+            top: 85px;
             right: 18px;
             background-color: white;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
+            z-index: 1100;
             width: 200px;
             border-radius: 10px;
         }

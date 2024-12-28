@@ -6,6 +6,7 @@ public record CreateTransferRequest(
     Guid UserId,
     int CategoryId,
     int WalletId,
+    string Title,
     string? Notes,
     decimal Amount,
     DateTime Date)

@@ -8,6 +8,10 @@
 <form asp-action="Edit" enctype="multipart/form-data" method="post" id="transfer-form">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <input type="hidden" name="Id" value="@Model.Id"/>
+    <div class="mb-3">
+        <ejs-textbox id="title" placeholder="Title" ejs-for="Title"
+                     floatLabelType="Always" required ></ejs-textbox>
+    </div>
     <div class="d-flex justify-content-between gap-4  mb-4">
         <div class="w-100">
             <ejs-combobox id="wallets-combobox"
@@ -93,7 +97,6 @@
 
         const fileName = fileInput.files[0].name;
 
-        // Create a new list item
         const listItem = document.createElement('li');
 
         listItem.innerHTML = `
@@ -103,7 +106,6 @@
 
         fileList.appendChild(listItem);
 
-        // Reset the file input for the next file
         fileInput.value = '';
     }
 

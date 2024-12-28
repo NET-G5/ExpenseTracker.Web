@@ -15,10 +15,10 @@
     </div>
     <div class="row value">
         <div class="col text-center">
-            <span> @Model.Wallet.Name</span>
+            <span> @Model.WalletName</span>
         </div>
         <div class="col text-center">
-            <span> @Model.Category.Name</span>
+            <span> @Model.CategoryName</span>
         </div>
     </div>
     <div class="row content">
@@ -101,7 +101,7 @@
 </div>
 
 <script>
-    var note = @Html.Raw(Json.Serialize(Model.Note));
+    var note = @Html.Raw(Json.Serialize(Model.Notes));
 
     if (note === null) {
         $("#detailsTransferDescription").text('No comment');

@@ -30,6 +30,11 @@ public class CategoriesController : Controller
         return Json(category);
     }
 
+    public IActionResult Create()
+    {
+        return View();
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([FromForm] CreateCategoryRequest request)
@@ -68,8 +73,14 @@ public class CategoriesController : Controller
         return RedirectToAction(nameof(Index));
 
     }
+    public async Task<IActionResult> Delete([FromRoute] CategoryRequest request)
+    {
+        var category = await _store.GetById(request);
 
-    [HttpDelete, ActionName("Delete")]
+        return View(category);
+    }
+
+    [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed([FromRoute] CategoryRequest request)
     {

@@ -84,5 +84,6 @@ public sealed class ApiClient : IApiClient
         }
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
     }
 }

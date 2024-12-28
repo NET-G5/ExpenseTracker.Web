@@ -13,12 +13,11 @@
                              name="search"
                              placeholder="Search categories..."
                              floatLabelType="Never"
-                             width="w-75"
-                             input="onSearchChange"
+                             width="w-75"                             
                              value="@ViewBag.Search">
                 </ejs-textbox>
             </div>
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createCategoryModal">+Category</button>
+            <button id="openCategoryModalButton" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createCategoryModal">+Category</button>
         </div>
     </div>
 </div>
@@ -29,7 +28,7 @@
             <e-grid-pagesettings pageSize="8"></e-grid-pagesettings>
             <e-grid-columns>
                 <e-grid-column headerText="Name" field="Name" width="150px"></e-grid-column>
-                <e-grid-column headerText="Type" template="#typeColumnTemplate" width="150px"></e-grid-column>
+                <e-grid-column headerText="Type" field="Type" template="#typeColumnTemplate" width="150px"></e-grid-column>
                 <e-grid-column template="#actionColumnTemplate" width="100px"></e-grid-column>
             </e-grid-columns>
         </ejs-grid>
@@ -41,13 +40,68 @@
     </div>
 </div>
 
+<div class="modal fade" id="categoryCreatemodal" tabindex="-1" aria-labelledby="createCategoryModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-center">
+                <h5 class="modal-title">New category</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <div id="categoryCreateContent" class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteCategoryModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog  modal-dialog-centered">
+        <div class="modal-content">
+            <div id="deleteCategoryContent" class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#openCategoryModalButton').on('click', function () {
+            $('#categoryCreateContent').empty();
+            $.ajax({
+                url: "/categories/create",
+                type: 'GET',
+                success: function (data) {
+                    $('#categoryCreateContent').html(data);
+                    $('#categoryCreatemodal').modal({
+                        backdrop: 'static',
+                        keyboard: false
+                    }).modal('show');
+                },
+                error: function (error) {
+                    alert("Yaratish oynasini ochishda muommo bo'ldi \n" + error);
+                }
+            });
+            $(this).find('#categoryCreateContent').empty();
+            $(this).off('hidden.bs.modal');
+            $('#categoryCreatemodal').on('click', function (e) {
+                if ($(e.target).is('#categoryCreatemodal')) {
+                    const modalContent = $(this).find('.modal-content');
+                    modalContent.addClass('shake');
+                    setTimeout(() => {
+                        modalContent.removeClass('shake');
+                    }, 500);
+                }
+            });
+        });
+    });
+</script>
+
 @if (Model != null && Model.Any())
 {
-    @await Html.PartialAsync("Modals/Edit", Model.FirstOrDefault())
+    @await Html.PartialAsync("Edit", Model.FirstOrDefault())
 }
-@await Html.PartialAsync("Modals/Create")
-@await Html.PartialAsync("Modals/Delete")
-@await Html.PartialAsync("Modals/Details")
+@await Html.PartialAsync("Details")
 
 <script id="typeColumnTemplate" type="text/x-template">
     ${if(Type == 0)}
@@ -71,31 +125,40 @@
     </div>
 </script>
 
-<script>
-    function onSearchChange(args) {
-        if (!args) {
-            return;
-        }
+@* <script src="https://code.jquery.com/jquery-3.6.0.min.js"> </script>
 
-        const search = args.value;
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"> </script>
+ *@
+<script type="text/javascript">
+    function openDeleteModal(id) {
+        $('#deleteCategoryContent').empty();
         $.ajax({
+            url: "/categories/delete/" + id,
             type: 'GET',
-            url: `/getCategories?search=${search}`,
-            contentType: 'json',
             success: function (data) {
-                const grid = document.getElementById("categories").ej2_instances[0];
-                grid.dataSource = data;
-                grid.refresh();
+                $('#deleteCategoryContent').html(data);
+                $('#deleteCategoryModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                }).modal('show');
+            },
+            error: function (error) {
+                alert("Error \n" + error);
+            }
+        });
+        $(this).find('#deleteCategoryContent').empty();
+        $(this).off('hidden.bs.modal');
+        $('#deleteCategoryModal').on('click', function (e) {
+            if ($(e.target).is('#deleteCategoryModal')) {
+                const modalContent = $(this).find('.modal-content');
+                modalContent.addClass('shake');
+                setTimeout(() => {
+                    modalContent.removeClass('shake');
+                }, 500);
             }
         });
     }
-    
 </script>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"> </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"> </script>
 
 <script>    
     function loadCategories() {
@@ -104,6 +167,7 @@
             url: '/getCategories', 
             contentType: 'json',
             success: function (data) {
+                console.log(data);
                 const grid = document.getElementById("categories").ej2_instances[0];
                 grid.dataSource = data;
                 grid.refresh();

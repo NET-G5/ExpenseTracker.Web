@@ -1,203 +1,219 @@
-//using ExpenseTracker.Web.Mappings;
-//using ExpenseTracker.Web.Requests.Category;
-//using ExpenseTracker.Web.Requests.Common;
-//using ExpenseTracker.Web.Requests.Transfer;
-//using ExpenseTracker.Web.Requests.Wallet;
-//using ExpenseTracker.Web.Stores.Interfaces;
-//using ExpenseTracker.Web.ViewModels.Transfer;
-//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.AspNetCore.Mvc.ModelBinding;
+using ExpenseTracker.Web.Requests.Category;
+using ExpenseTracker.Web.Requests.Common;
+using ExpenseTracker.Web.Requests.Transfer;
+using ExpenseTracker.Web.Requests.Wallet;
+using ExpenseTracker.Web.Stores.Category;
+using ExpenseTracker.Web.Stores.Pdpf;
+using ExpenseTracker.Web.Stores.Transfer;
+using ExpenseTracker.Web.Stores.Wallet;
+using ExpenseTracker.Web.ViewModels.Transfer;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-//namespace ExpenseTracker.Web.Controllers;
+namespace ExpenseTracker.Web.Controllers;
 
-//public class TransfersController : Controller
-//{
-//    public const int MaxFileSize = 2 * 1024 * 1024;
-//    public const int MinFileSize = 1024;
+public class TransfersController : Controller
+{
+    public const int MaxFileSize = 2 * 1024 * 1024;
+    public const int MinFileSize = 1024;
 
-//    private static readonly List<string> _allowedFileTypes =
-//    [
-//        "png", "jpeg", "gif", "pdf"
-//    ];
+    private static readonly List<string> _allowedFileTypes =
+    [
+        "png", "jpeg", "gif", "pdf"
+    ];
 
-//    private readonly ITransferStore _transferStore;
-//    private readonly ICategoryStore _categoryStore;
-//    private readonly IWalletStore _walletStore;
+    private readonly ITransferStore _transferStore;
+    private readonly ICategoryStore _categoryStore;
+    private readonly IWalletStore _walletStore;
+    private readonly PdfStore _pdfStore;
 
-//    public TransfersController(ITransferStore store, ICategoryStore categoryStore, IWalletStore walletStore)
-//    {
-//        _transferStore = store ?? throw new ArgumentNullException(nameof(store));
-//        _categoryStore = categoryStore ?? throw new ArgumentNullException(nameof(categoryStore));
-//        _walletStore = walletStore ?? throw new ArgumentNullException(nameof(walletStore));
-//    }
+    public TransfersController(PdfStore pdfStore, ITransferStore store, ICategoryStore categoryStore, IWalletStore walletStore)
+    {
+        _pdfStore = pdfStore ?? throw new ArgumentNullException(nameof(pdfStore));
+        _transferStore = store ?? throw new ArgumentNullException(nameof(store));
+        _categoryStore = categoryStore ?? throw new ArgumentNullException(nameof(categoryStore));
+        _walletStore = walletStore ?? throw new ArgumentNullException(nameof(walletStore));
+    }
 
-//    public IActionResult Index([FromQuery] GetTransfersRequest request)
-//    {
-//        var transfers = _transferStore.GetAll(request);
-//        var categories = _categoryStore.GetAll(new GetCategoriesRequest(request.UserId, null));
-//        var wallets = _walletStore.GetAll(new GetWalletsRequest(request.UserId, null));
+    public async Task<IActionResult> Index([FromQuery] GetTransfersRequest request)
+    {
+        var transfers = await _transferStore.GetAll(request);
+        var categories = await _categoryStore.GetAll(new GetCategoriesRequest(request.UserId, null));
+        var wallets = await _walletStore.GetAll(new GetWalletsRequest(request.UserId, null));
 
 
-//        ViewBag.Search = request.Search;
-//        ViewBag.Categories = categories;
-//        ViewBag.SelectedCategory = request.CategoryId;
-//        ViewBag.Wallets = wallets;
+        ViewBag.Search = request.Search;
+        ViewBag.Categories = categories;
+        ViewBag.SelectedCategory = request.CategoryId;
+        ViewBag.Wallets = wallets;
 
-//        return View(transfers);
-//    }
+        return View(transfers);
+    }
 
-//    public IActionResult Details([FromRoute] TransferRequest request)
-//    {
-//        var transfer = _transferStore.GetById(request);
+    public async Task<IActionResult> Details([FromRoute] TransferRequest request)
+    {
+        var transfer = await _transferStore.GetById(request);
 
-//        return View(transfer);
-//    }
+        return View(transfer);
+    }
 
-//    public IActionResult Create([FromHeader] UserRequestId request)
-//    {
-//        PopulateViewBag(request);
+    public async Task<IActionResult> Create([FromHeader] UserRequest request)
+    {
+        await PopulateViewBag(request);
 
-//        var model = new CreateTransferRequest(
-//            UserId: request.UserId,
-//            CategoryId: default,
-//            WalletId: default,
-//            Notes: default,
-//            Amount: default,
-//            Date: DateTime.UtcNow);
+        var model = new CreateTransferRequest(
+            UserId: request.UserId,
+            CategoryId: default,
+            Title: default,
+            WalletId: default,
+            Notes: default,
+            Amount: default,
+            Date: DateTime.UtcNow);
 
-//        return View(model);
-//    }
+        return View(model);
+    }
 
-//    [HttpPost]
-//    [ValidateAntiForgeryToken]
-//    public IActionResult Create([FromForm] CreateTransferRequest request, [FromForm] List<IFormFile> attachments)
-//    {
-//        if (!ModelState.IsValid)
-//        {
-//            return RedirectToAction("Create");
-//        }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create([FromForm] CreateTransferRequest request, [FromForm] List<IFormFile> attachments)
+    {
+        if (!ModelState.IsValid)
+        {
+            return RedirectToAction("Create");
+        }
 
-//        foreach (var attachment in attachments)
-//        {
-//            if (!TryValidateFile(ModelState, attachment))
-//            {
-//                PopulateViewBag(request, request.CategoryId, request.WalletId);
+        foreach (var attachment in attachments)
+        {
+            if (!TryValidateFile(ModelState, attachment))
+            {
+                await PopulateViewBag(request, request.CategoryId, request.WalletId);
 
-//                return View(request);
-//            }
-//        }
+                return View(request);
+            }
+        }
 
-//        var createdTransfer = _transferStore.Create(request, attachments);
+        var createdTransfer = await _transferStore.Create(request, attachments);
 
-//        return RedirectToAction(nameof(Index));
-//    }
+        return RedirectToAction(nameof(Index));
+    }
 
-//    public IActionResult Edit([FromRoute] TransferRequest request)
-//    {
-//        var transfer = _transferStore.GetById(request);
+    public async Task<IActionResult> Edit([FromRoute] TransferRequest request)
+    {
+        var transfer = await _transferStore.GetById(request);
 
-//        PopulateViewBag(request, transfer.Category.Id, transfer.Wallet.Id);
+        await PopulateViewBag(request, transfer.CategoryId, transfer.WalletId);
 
-//        var transferResult = transfer.ToUpdateRequest();
+        var model = new UpdateTransferRequest(
+            Id: request.Id,
+            UserId: request.UserId,
+            CategoryId: transfer.CategoryId,
+            Title: transfer.Title,
+            WalletId: transfer.WalletId,
+            Notes: transfer.Notes,
+            Amount: transfer.Amount,
+            Date: transfer.Date);
 
-//        return View(transferResult);
-//    }
+        return View(model);
+    }
 
-//    [HttpPost]
-//    [ValidateAntiForgeryToken]
-//    public IActionResult Edit([FromForm] UpdateTransferRequest request, [FromForm] List<IFormFile> attachments)
-//    {
-//        //if ()
-//        //{
-//        //    return BadRequest("Route id does not match with body id.");
-//        //}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit([FromForm] UpdateTransferRequest request, [FromForm] List<IFormFile> attachments)
+    {
 
-//        if (!ModelState.IsValid)
-//        {
-//            return View(request);
-//        }
+        if (!ModelState.IsValid)
+        {
+            return View(request);
+        }
 
-//        _transferStore.Update(request);
+        await _transferStore.Update(request);
 
-//        return RedirectToAction(nameof(Index));
-//    }
+        return RedirectToAction(nameof(Index));
+    }
 
-//    public IActionResult Delete([FromRoute] TransferRequest request)
-//    {
-//        var transfer = _transferStore.GetById(request);
+    public async Task<IActionResult> Delete([FromRoute] TransferRequest request)
+    {
+        var transfer = await _transferStore.GetById(request);
 
-//        return View(transfer);
-//    }
+        return View(transfer);
+    }
 
-//    [HttpPost, ActionName("Delete")]
-//    [ValidateAntiForgeryToken]
-//    public IActionResult DeleteConfirmed([FromRoute] TransferRequest request)
-//    {
-//        _transferStore.Delete(request);
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed([FromRoute] TransferRequest request)
+    {
+        await _transferStore.Delete(request);
 
-//        return RedirectToAction(nameof(Index));
-//    }
+        return RedirectToAction(nameof(Index));
+    }
 
-//    /// <summary>
-//    /// Filters transfers
-//    /// </summary>
-//    /// <param name="categoryId"></param>
-//    /// <param name="search"></param>
-//    /// <returns>List of filtered transfers</returns>
-//    [Route("getTransfers")]
-//    public ActionResult<TransferViewModel> GetTransfers(GetTransfersRequest request)
-//    {
-//        var result = _transferStore.GetAll(request);
+    /// <summary>
+    /// Filters transfers
+    /// </summary>
+    /// <param name="categoryId"></param>
+    /// <param name="search"></param>
+    /// <returns>List of filtered transfers</returns>
+    [Route("getTransfers")]
+    public async Task<ActionResult<TransferViewModel>> GetTransfers(GetTransfersRequest request)
+    {
+        var result = await _transferStore.GetAll(request);
 
-//        return Ok(result);
-//    }
+        return Ok(result);
+    }
 
-//    private static bool TryValidateFile(ModelStateDictionary modelState, IFormFile? formFile)
-//    {
-//        if (formFile is null)
-//        {
-//            return true;
-//        }
+    [HttpGet]
+    public async Task<IActionResult> DownloadPdf(GetTransfersRequest request)
+    {
+        var stream = await _pdfStore.PdfDownload(request);
 
-//        if (formFile.Length < MinFileSize)
-//        {
-//            modelState.AddModelError(string.Empty, "Image file is too small.");
+        return File(stream, "application/pdf", "Transfers.pdf");
+    }
+    private static bool TryValidateFile(ModelStateDictionary modelState, IFormFile? formFile)
+    {
+        if (formFile is null)
+        {
+            return true;
+        }
 
-//            return false;
-//        }
+        if (formFile.Length < MinFileSize)
+        {
+            modelState.AddModelError(string.Empty, "Image file is too small.");
 
-//        if (formFile.Length > MaxFileSize)
-//        {
-//            modelState.AddModelError(string.Empty, "Image file is too big.");
+            return false;
+        }
 
-//            return false;
-//        }
+        if (formFile.Length > MaxFileSize)
+        {
+            modelState.AddModelError(string.Empty, "Image file is too big.");
 
-//        if (!_allowedFileTypes.Exists(type => formFile.ContentType.Contains(type)))
-//        {
-//            modelState.AddModelError(string.Empty, "Invalid image format");
+            return false;
+        }
 
-//            return false;
-//        }
+        if (!_allowedFileTypes.Exists(type => formFile.ContentType.Contains(type)))
+        {
+            modelState.AddModelError(string.Empty, "Invalid image format");
 
-//        return true;
-//    }
+            return false;
+        }
 
-//    private void PopulateViewBag(UserRequestId request, int? categoryId = null, int? walletId = null)
-//    {
-//        var categories = _categoryStore.GetAll(new GetCategoriesRequest(request.UserId, null));
-//        var wallets = _walletStore.GetAll(new GetWalletsRequest(request.UserId, null));
+        return true;
+    }
 
-//        var defaultCategory = categoryId.HasValue
-//            ? categories.First(x => x.Id == categoryId.Value)
-//            : categories.FirstOrDefault();
-//        var defaultWallet = walletId.HasValue
-//            ? wallets.First(x => x.Id == walletId.Value)
-//            : wallets.FirstOrDefault();
+    private async Task PopulateViewBag(UserRequest request, int? categoryId = null, int? walletId = null)
+    {
+        var categories = await _categoryStore.GetAll(new GetCategoriesRequest(request.UserId, null));
+        var wallets = await _walletStore.GetAll(new GetWalletsRequest(request.UserId, null));
 
-//        ViewBag.Wallets = wallets;
-//        ViewBag.Categories = categories;
-//        ViewBag.DefaultCategory = defaultCategory;
-//        ViewBag.DefaultWallet = defaultWallet;
-//    }
-//}
+        var defaultCategory = categoryId.HasValue
+            ? categories.First(x => x.Id == categoryId.Value)
+            : categories.FirstOrDefault();
+        var defaultWallet = walletId.HasValue
+            ? wallets.First(x => x.Id == walletId.Value)
+            : wallets.FirstOrDefault();
+
+        ViewBag.Wallets = wallets;
+        ViewBag.Categories = categories;
+        ViewBag.DefaultCategory = defaultCategory;
+        ViewBag.DefaultWallet = defaultWallet;
+    }
+}
