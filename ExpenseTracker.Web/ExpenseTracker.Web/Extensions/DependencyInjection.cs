@@ -5,6 +5,9 @@ using ExpenseTracker.Web.Stores;
 using ExpenseTracker.Web.Stores.Auth;
 using ExpenseTracker.Web.Stores.Category;
 using ExpenseTracker.Web.Stores.Dashboard;
+using ExpenseTracker.Web.Stores.Pdpf;
+using ExpenseTracker.Web.Stores.Transfer;
+using ExpenseTracker.Web.Stores.Wallet;
 using Syncfusion.Licensing;
 
 namespace ExpenseTracker.Web.Extensions;
@@ -44,6 +47,9 @@ public static class DependencyInjection
         services.AddScoped<IAuthStore, AuthStore>();
         services.AddScoped<IDashboardStore, DashboardStore>();
         services.AddScoped<ICategoryStore, CategoryStore>();
+        services.AddScoped<IWalletStore, WalletStore>();
+        services.AddScoped<ITransferStore, TransferStore>();
+        services.AddScoped<PdfStore>();
     }
 
     private static void AddServices(IServiceCollection services)

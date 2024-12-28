@@ -1,17 +1,16 @@
-﻿using ExpenseTracker.Web.ViewModels.Category;
-using ExpenseTracker.Web.ViewModels.Wallet;
-
-namespace ExpenseTracker.Web.ViewModels.Transfer;
+﻿namespace ExpenseTracker.Web.ViewModels.Transfer;
 
 public class TransferViewModel
 {
     public int Id { get; init; }
-    public string? Note { get; init; }
+    public string Title { get; init; }
+    public string? Notes { get; init; }
     public decimal Amount { get; init; }
     public DateTime Date { get; init; }
-
-    public required WalletViewModel Wallet { get; set; }
-    public required CategoryViewModel Category { get; init; }
+    public int CategoryId { get; init; }
+    public string CategoryName { get; set; }
+    public int WalletId { get; init; }
+    public string WalletName { get; set; }
 
     public List<string> Images { get; init; }
 

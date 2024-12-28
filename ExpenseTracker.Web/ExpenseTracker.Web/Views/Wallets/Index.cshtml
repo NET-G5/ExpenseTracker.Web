@@ -19,7 +19,7 @@
                              value="@ViewBag.Search">
                 </ejs-textbox>
             </div>
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createWalletModal">+Wallet</button>
+            <button id="openWalletModalButton" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createWalletModal">+Wallet</button>
         </div>
     </div>
 </div>
@@ -77,6 +77,36 @@
     </div>
 </div>
 
+<div class="modal fade" id="createWalletModal" tabindex="-1" aria-labelledby="createCategoryModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-center">
+                <h5 class="modal-title">New wallet</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <div id="walletCreateContent" class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="detailsWalletModal" tabindex="-1" aria-labelledby="detailsWalletModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content w-100">
+            <div class="modal-header d-flex justify-content-center">
+                <div><h5 class="modal-title">Details</h5></div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <div id="walletdetailsContent" class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="walletSharemodal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg" style="width:600px">
         <div class="modal-content">
@@ -96,7 +126,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header d-flex justify-content-center">
-                <h4 class="modal-title">Wallet edit</h4>
+                <h4 class="modal-title">Edit wallet</h4>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
                     <span aria-hidden="true"></span>
                 </button>
@@ -107,9 +137,6 @@
     </div>
 </div>
 
-@await Html.PartialAsync("Create")
-@await Html.PartialAsync("Details")
-
 <script>
     function loadWallets() {
         $.ajax({
@@ -117,7 +144,6 @@
             url: '/getwallets',
             contentType: 'json',
             success: function (data) {
-                onSave();
                 const grid = document.getElementById("wallets-list").ej2_instances[0];
                 grid.dataSource = data;
                 grid.refresh();
@@ -164,6 +190,70 @@
             }
         }
     }
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('#openWalletModalButton').on('click', function () {
+            $('#walletCreateContent').empty();
+            $.ajax({
+                url: "/wallets/create",
+                type: 'GET',
+                success: function (data) {
+                    $('#walletCreateContent').html(data);
+                    $('#createWalletModal').modal({
+                        backdrop: 'static',
+                        keyboard: false
+                    }).modal('show');
+                },
+                error: function (error) {
+                    alert("Yaratish oynasini ochishda muommo bo'ldi \n" + error);
+                }
+            });
+            $(this).find('#walletCreateContent').empty();
+            $(this).off('hidden.bs.modal');
+            $('#createWalletModal').on('click', function (e) {
+                if ($(e.target).is('#createWalletModal')) {
+                    const modalContent = $(this).find('.modal-content');
+                    modalContent.addClass('shake');
+                    setTimeout(() => {
+                        modalContent.removeClass('shake');
+                    }, 500);
+                }
+            });
+        });
+    });
+</script>
+
+<script type="text/javascript">
+    function onDetailsClick(id) {
+        $('#walletdetailsContent').empty();
+        $.ajax({
+            type: 'GET',
+            url: `/wallets/details/${id}`,
+            success: function (data) {
+                console.log(data);
+                $('#walletdetailsContent').html(data);
+                $('#detailsWalletModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                }).modal('show');               
+            },
+            error: function (error) {
+                console.log('Error fetching category details:', error);
+            }
+        });
+    }
+
+    $('#detailsWalletModal').on('click', function (e) {
+        if ($(e.target).is('#detailsWalletModal')) {
+            const modalContent = $(this).find('.modal-content');
+            modalContent.addClass('shake');
+            setTimeout(() => {
+                modalContent.removeClass('shake');
+            }, 500);
+        }
+    });
 </script>
 
 <script type="text/javascript">

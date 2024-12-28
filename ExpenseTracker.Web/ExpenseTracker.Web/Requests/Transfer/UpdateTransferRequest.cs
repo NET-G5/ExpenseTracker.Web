@@ -5,6 +5,7 @@ public sealed record UpdateTransferRequest(
     int Id,
     int CategoryId,
     int WalletId,
+    string Title,
     string? Notes,
     decimal Amount,
     DateTime Date)
@@ -12,6 +13,7 @@ public sealed record UpdateTransferRequest(
         UserId: UserId,
         CategoryId: CategoryId,
         WalletId: WalletId,
+        Title: Title,
         Notes: Notes,
         Amount: Amount,
         Date: Date);

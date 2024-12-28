@@ -4,7 +4,7 @@ public sealed record UpdateWalletRequest(
     Guid UserId,
     int Id,
     string Name,
-    string Description,
+    string? Description,
     decimal Balance,
     bool IsMain)
     : CreateWalletRequest(

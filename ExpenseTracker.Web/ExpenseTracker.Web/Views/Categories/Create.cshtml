@@ -1,0 +1,24 @@
+﻿@model ExpenseTracker.Web.Requests.Category.CreateCategoryRequest;
+
+@{
+    Layout = "~/Views/Shared/_ModalForLayout.cshtml";
+}
+<form id="createCategoryForm" asp-action="Create" enctype="multipart/form-data" method="post">
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <ejs-textbox type="text" ejs-for=Name placeholder="Name" floatLabelType="Always" class="form-control" id="categoryName" name="Name" required />
+    </div>
+    <div class="mb-4">
+        <label for="categoryType" class="form-label text-box">Type</label>
+        <select asp-for=Type class="form-select type-select pt-2 pb-2" id="categoryType" name="Type">
+            <option value="1">Expense</option>
+            <option value="0">Income</option>
+        </select>
+    </div>
+    <div class="mb-5">
+        <ejs-textbox ejs-for=Description type="text" placeholder="Note" floatLabelType="Always" multiline=true class="form-control" id="categoryDescription" name="Description" />
+    </div>
+    <div class="d-grid gap-3">
+        <button type="submit" class="btn btn-success">Save</button>
+    </div>
+</form>
