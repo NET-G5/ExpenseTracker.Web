@@ -92,7 +92,7 @@ public class AccountController : Controller
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error registering: {ex.Message}");
+            _logger.LogError(ex, $"Error registering: {ex.Message}");
             throw;
         }
     }
