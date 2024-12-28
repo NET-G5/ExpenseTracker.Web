@@ -9,7 +9,7 @@ public class ExceptionFilter : IExceptionFilter
 {
     public void OnException(ExceptionContext context)
     {
-        Log.Error(context.Exception.Message);
+        Log.Error(context.Exception, context.Exception.Message);
 
         var statusCode = context.Exception switch
         {
