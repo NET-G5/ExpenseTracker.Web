@@ -1,13 +1,18 @@
 using ExpenseTracker.Web.Extensions;
 using Serilog;
 
+var builder = WebApplication.CreateBuilder(args);
+
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
+    .ReadFrom.Configuration(builder.Configuration)
     .WriteTo.Console()
-    .WriteTo.File("logs/logs_.txt", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Day)
+    .WriteTo.ApplicationInsights(new Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration
+    {
+        ConnectionString = "InstrumentationKey=dd6c48e1-43ca-43d2-ac34-c075f121a1d9;IngestionEndpoint=https://canadacentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://canadacentral.livediagnostics.monitor.azure.com/;ApplicationId=dd192d0d-aebd-4195-8cda-16f6cee9f3ef"
+    }, TelemetryConverter.Traces)
     .CreateLogger();
 
-var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.RegisterServices(builder.Configuration);
