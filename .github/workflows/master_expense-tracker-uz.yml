@@ -23,17 +23,15 @@ jobs:
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
-        working-directory: ExpenseTracker.Web
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/ExpenseTracker.Web"
-        working-directory: ExpenseTracker.Web
+        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/ExpenseTracker.Web
+          path: ${{env.DOTNET_ROOT}}/myapp
 
   deploy:
     runs-on: windows-latest
@@ -53,9 +51,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0F3325C41A9A4220BDA3BA9F8FF84D29 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0B3E412A84D048BF9366916DC931F274 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_15D6FFC4809E4F2AB3FDCD51FA5487FC }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_409A07A29AD54068B0EA2B5818B11F6F }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_6F659B005B664AF89E3585F088DCDD45 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_402770FA38E64211A58A2F3C335F919B }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
