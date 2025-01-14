@@ -24,12 +24,6 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult Login(string? returnUrl = null)
     {
-        _logger.LogInformation("Entered Login page");
-        _logger.LogWarning("Warning from Login");
-        _logger.LogError("Error from Login");
-        _logger.LogTrace("Trace from Login");
-        _logger.LogCritical("Critical from Login");
-
         ViewData["ReturnUrl"] = returnUrl;
 
         return View();
@@ -49,11 +43,11 @@ public class AccountController : Controller
 
         if (isSuccess)
         {
-            _logger.LogInformation("Login successful");
             return RedirectToAction("Index", "Home");
         }
 
-        _logger.LogWarning("Login failed");
+        _logger.LogWarning("Login attempt for username {UserName} failed", request.UserName);
+
         ViewData["ErrorMessage"] = "Invalid username or password.";
         return View(request);
     }

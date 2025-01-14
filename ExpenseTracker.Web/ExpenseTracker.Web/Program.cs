@@ -1,14 +1,31 @@
+using Azure.Identity;
 using ExpenseTracker.Web.Extensions;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+var keyVaultUri = builder.Configuration.GetValue<string>("KeyVaultUri");
+
+builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUri), new DefaultAzureCredential());
+
+//builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUri),
+//    new ClientSecretCredential(
+//        builder.Configuration.GetValue<string>("AzureAd:TenantId"),
+//        builder.Configuration.GetValue<string>("AzureAd:ClientId"),
+//        builder.Configuration.GetValue<string>("AzureAd:ClientSecret")));
+
+var connectionString = builder.Configuration.GetValue<string>("ApplicationInsight:ConnectionString");
+
+if (string.IsNullOrEmpty(connectionString))
+{
+    Log.Error("Could not load application insight connection string.");
+}
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .WriteTo.Console()
     .WriteTo.ApplicationInsights(new Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration
     {
-        ConnectionString = "InstrumentationKey=dd6c48e1-43ca-43d2-ac34-c075f121a1d9;IngestionEndpoint=https://canadacentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://canadacentral.livediagnostics.monitor.azure.com/;ApplicationId=dd192d0d-aebd-4195-8cda-16f6cee9f3ef"
+        ConnectionString = connectionString,
     }, TelemetryConverter.Traces)
     .CreateLogger();
 

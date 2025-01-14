@@ -29,7 +29,7 @@ public static class DependencyInjection
     {
         services.AddControllersWithViews(options =>
         {
-            options.Filters.Add(new ExceptionFilter());
+            options.Filters.Add<ExceptionFilter>();
         });
     }
 
