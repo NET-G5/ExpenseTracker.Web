@@ -55,4 +55,31 @@ internal sealed class AuthStore : IAuthStore
 
         response.EnsureSuccessStatusCode();
     }
+
+    public async Task<bool> ResetPasswordAsync(ForgotPasswordRequest request)
+    {
+        var response = await _client.PostAsJsonAsync("auth/reset-password", request);
+
+        response.EnsureSuccessStatusCode();
+
+        if (response.IsSuccessStatusCode)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public async Task<bool> ConfirmResetPasswordAsync(ResetPasswordRequest request)
+    {
+        var response = await _client.PostAsJsonAsync("auth/reset-password-confirm", request);
+        response.EnsureSuccessStatusCode();
+
+        if (response.IsSuccessStatusCode)
+        {
+            return true;
+        }
+
+        return false;
+    }
 }

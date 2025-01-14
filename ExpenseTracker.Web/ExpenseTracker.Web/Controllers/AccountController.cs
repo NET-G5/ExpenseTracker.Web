@@ -104,6 +104,63 @@ public class AccountController : Controller
         return View();
     }
 
+    public IActionResult ForgotPassword()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request)
+    {
+        var userAgent = _contextAccessor.HttpContext?.Request?.Headers.UserAgent;
+        var agent = Parser.GetDefault().Parse(userAgent);
+
+        request.Browser = agent.UA.ToString();
+        request.OS = agent.OS.ToString();
+        request.RedirectUrl = Url.Action(nameof(PasswordReset), "Account", null, protocol: Request.Scheme);
+
+        var response = await _store.ResetPasswordAsync(request);
+
+        if (response is false)
+        {
+            return BadRequest("Invalid request");
+        }
+
+        return RedirectToAction(nameof(PasswordResetConfirmation));
+    }
+
+    public IActionResult PasswordResetConfirmation()
+    {
+        return View();
+    }
+
+    public IActionResult PasswordReset(string email, string token)
+    {
+        var request = new ResetPasswordRequest(email, token, null!, null!);
+
+        return View(request);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> PasswordReset([FromForm] ResetPasswordRequest request)
+
+    {
+        if (!ModelState.IsValid)
+        {
+            BadRequest("Passwords must match");
+        }
+
+        var response = await _store.ConfirmResetPasswordAsync(request);
+
+        if (response is false)
+        {
+            return BadRequest("Invalid request");
+        }
+
+
+        return RedirectToAction(nameof(Login));
+    }
+
     //public IActionResult RegisterConfirmation()
     //{
     //    return View();
@@ -185,78 +242,7 @@ public class AccountController : Controller
     //    return View();
     //}
 
-    //public IActionResult ForgotPassword()
-    //{
-    //    return View();
-    //}
 
-    //[HttpPost]
-    //public async Task<IActionResult> ForgotPassword(Application.Requests.Auth.ForgotPasswordRequest request)
-    //{
-    //    var user = await _userManager.FindByEmailAsync(request.Email);
-
-    //    if (user is null)
-    //    {
-    //        return BadRequest("Invalid request");
-    //    }
-
-    //    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
-    //    var confirmationUrl = Url.Action(
-    //        nameof(PasswordReset),
-    //        "Account",
-    //        new { email = user.Email, token },
-    //        protocol: Request.Scheme);
-
-    //    var emailMessage = new EmailMessage(request.Email, request.Email, "Password reset", confirmationUrl);
-    //    var userAgent = _contextAccessor.HttpContext?.Request?.Headers?.UserAgent;
-    //    var agent = Parser.GetDefault().Parse(userAgent);
-    //    var userInfo = new UserInfo(agent.UA.ToString(), agent.OS.ToString());
-
-    //    _emailService.SendResetPassword(emailMessage, userInfo);
-
-    //    return RedirectToAction(nameof(PasswordResetConfirmation));
-    //}
-
-    //public IActionResult PasswordResetConfirmation()
-    //{
-    //    return View();
-    //}
-
-    //public IActionResult PasswordReset(string email, string token)
-    //{
-    //    var request = new Application.Requests.Auth.ResetPasswordRequest(email, null, null, token);
-
-    //    return View(request);
-    //}
-
-    //[HttpPost]
-
-    //public async Task<IActionResult> PasswordReset([FromForm] Application.Requests.Auth.ResetPasswordRequest request)
-
-    //{
-    //    var user = await _userManager.FindByEmailAsync(request.Email);
-
-    //    if (user is null)
-    //    {
-    //        return BadRequest("Invalid request");
-    //    }
-
-    //    if (!user.EmailConfirmed)
-    //    {
-    //        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-    //        await _userManager.ConfirmEmailAsync(user, token);
-    //    }
-
-    //    var result = await _userManager.ResetPasswordAsync(user, request.Token, request.Password);
-
-    //    if (result.Succeeded)
-    //    {
-    //        return RedirectToAction(nameof(Login));
-    //    }
-
-    //    return BadRequest("Invalid request");
-    //}
 
     //private IActionResult RedirectToLocal(string? returnUrl)
     //{
