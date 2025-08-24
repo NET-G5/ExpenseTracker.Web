@@ -5,13 +5,6 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 var keyVaultUri = builder.Configuration.GetValue<string>("KeyVaultUri");
 
-builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUri), new DefaultAzureCredential());
-
-//builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUri),
-//    new ClientSecretCredential(
-//        builder.Configuration.GetValue<string>("AzureAd:TenantId"),
-//        builder.Configuration.GetValue<string>("AzureAd:ClientId"),
-//        builder.Configuration.GetValue<string>("AzureAd:ClientSecret")));
 
 var connectionString = builder.Configuration.GetValue<string>("ApplicationInsight:ConnectionString");
 
